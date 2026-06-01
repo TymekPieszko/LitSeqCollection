@@ -1,13 +1,13 @@
 ## Accessing the spreadhseet from R/Python
 
-One advantange of an online spreasheet is that sequencing metadata can be distributed without the need for local copies. Very helpfully, the spreasheet can be read directly into R/Python:
+One advantage of an online spreasheet is that sequencing metadata can be distributed without the need for local copies. Very helpfully, the spreadsheet can be read directly into R/Python:
 
 ```R
 ### R example
 
 sheet_url <- "https://docs.google.com/spreadsheets/d/1f9gFjXnZfK1a6hQ7MO7ZWTgpzmxh5XNeOMdvVghkZzM/edit?gid=1574494561#gid=1574494561"
 
-# Convert sheet URL - 
+# Convert sheet URL
 sheet_url <- sub("/edit\\?", "/export?format=csv&", sheet_url)
 sheet_url <- strsplit(sheet_url, "#")[[1]][1]
 
