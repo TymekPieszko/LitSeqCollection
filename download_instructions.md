@@ -16,6 +16,9 @@ pip install pandas numpy requests tqdm
 wget https://raw.githubusercontent.com/TymekPieszko/littorina-seq/main/get_fastq_urls.py &&
 wget https://raw.githubusercontent.com/TymekPieszko/littorina-seq/main/get_fastq_files.py &&
 wget https://raw.githubusercontent.com/TymekPieszko/littorina-seq/main/move_to_subdirs.py
+
+# Make scripts readable/writable/executable
+chmod +rwx *
 ```
 
 **(3)** Fetch FASTQ URLs for all (or a subset of) BioSample IDs. You can subset the dataset by most categorical columns, except:
