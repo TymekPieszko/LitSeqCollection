@@ -68,7 +68,7 @@ for sample, rows in samples.items():
 
 # Write skipped samples to file
 with open("skipped_samples.txt", "w") as f:
-    for s in samples:
+    for s in samples_to_skip:
         f.write(s + "\n") 
 
 print("-" * 50)
