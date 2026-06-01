@@ -1,1 +1,4 @@
 plot_map.py
+fastq/
+fastq*
+skipped_samples.txt
