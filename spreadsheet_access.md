@@ -4,7 +4,7 @@ One advantage of using an online spreadsheet is that sequencing metadata can be 
 
 Note that the Google Sheets view URL is converted into a CSV export URL so that the table can be read by `read.csv()` (in R) or `pandas.read_csv()` (in Python).
 
-# R example
+### R example
 
 ```r
 sheet_url <- "https://docs.google.com/spreadsheets/d/1f9gFjXnZfK1a6hQ7MO7ZWTgpzmxh5XNeOMdvVghkZzM/edit?gid=1574494561#gid=1574494561"
@@ -17,7 +17,7 @@ sheet_url <- strsplit(sheet_url, "#")[[1]][1]
 df <- read.csv(sheet_url, header = TRUE, skip = 3)
 ```
 
-# Python example
+### Python example
 
 ```python
 import pandas as pd
