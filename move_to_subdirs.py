@@ -27,4 +27,5 @@ with open(args.url_file) as f:
 
         dst.parent.mkdir(exist_ok=True)
 
-        shutil.move(src, dst)
+        if src.exists():
+            shutil.move(src, dst)
