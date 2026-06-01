@@ -97,7 +97,7 @@ with open(f"fastq_urls.tsv", "w") as f:
             f.write(url + "\n")
 
 # Write report
-with open(f"fastq_report.tsv", "w") as f:
+with open(f"fastq_urls.REPORT.tsv", "w") as f:
     f.write("sample_id\tspecies\tbiosample_id\tfastq_num\n")
     for id in id_to_urls.keys():
         f.write(df.loc[df["biosample_id"] == id, "sample_id"].values[0] + "\t")
