@@ -1,6 +1,6 @@
 ## Accessing the spreadhseet from R/Python
 
-One advatange of an online spreasheet is that sequencing metadata can be distributed without the need for local copies. Very helpfully, the spreasheet can be read directly into R/Python:
+One advantange of an online spreasheet is that sequencing metadata can be distributed without the need for local copies. Very helpfully, the spreasheet can be read directly into R/Python:
 
 ```R
 ### R example
