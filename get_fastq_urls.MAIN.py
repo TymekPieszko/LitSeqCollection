@@ -19,7 +19,7 @@ sheet_url = (
     .split("#")[0]
 )
  
-df = pd.read_csv(sheet_url, header=3)
+df = pd.read_csv(sheet_url, header=4)
 df = df.drop(columns=['Timestamp', 'Corresponder', 'Latitude', 'Longitude', 'Targeted_coverage'])
 df.columns = df.columns.str.lower()
 remove_whitespace(df)
@@ -36,7 +36,7 @@ for column, category in args.items():
         continue
     df = df.loc[np.isin(df[column], category.split(","))]
 
-# Useful info
+# Useful info - BUT THIS DOES NOT FIX ALL POTENTIAL ISSUES
 n = len(df)
 ids = len(df["biosample_id"].unique())
 print("-" * 50)
@@ -85,7 +85,7 @@ for id in biosample_ids:
                 id_to_urls[id].append(url)
                 url_to_size[url] = round(int(size) / 1024**3, 3) # This converts raw size in bytes to GiB 
 
-# Write URLs
+### Write URLs ###
 with open(f"fastq_urls.tsv", "w") as f:
     f.write("sample_id\tspecies\tbiosample_id\tsize_in_gib\tfastq_url\n")
     for id in id_to_urls.keys():
@@ -96,7 +96,7 @@ with open(f"fastq_urls.tsv", "w") as f:
             f.write(str(url_to_size[url]) + "\t")
             f.write(url + "\n")
 
-# Write report
+### Write report ###
 with open(f"fastq_urls.REPORT.tsv", "w") as f:
     f.write("sample_id\tspecies\tbiosample_id\tfastq_num\n")
     for id in id_to_urls.keys():
@@ -104,6 +104,11 @@ with open(f"fastq_urls.REPORT.tsv", "w") as f:
         f.write(df.loc[df["biosample_id"] == id, "species"].values[0] + "\t")
         f.write(id + "\t")
         f.write(f"{len(id_to_urls[id])}" + "\n") 
+
+### Write samples ###
+with open("samples.txt", "w") as f:
+    for s in df["sample_id"]:
+        f.write(f"{s}\n")
 
 # Useful info
 print(f"Collected {sum([len(x) for x in id_to_urls.values()])} FASTQ URLs.")

@@ -26,5 +26,5 @@ with open(args.url_file) as f:
         dst = fastq_dir / sample / filename
 
         if src.exists():
-            dst.parent.mkdir(exist_ok=True)
+            dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(src, dst)

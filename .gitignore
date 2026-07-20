@@ -1,4 +1,6 @@
-plot_map.py
-fastq/
-fastq*
-skipped_samples.txt
+plot_map.MAIN.py
+validate_dataset.MAIN.py
+*/
+*.txt
+*.tsv
+*CLAUDE*

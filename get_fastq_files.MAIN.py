@@ -1,12 +1,13 @@
 from pathlib import Path
 from urllib.parse import urlparse
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from multiprocessing import Pool
 from tqdm import tqdm
-import argparse, subprocess, csv, shutil
+import argparse, subprocess, csv
 
-
-def download(out_dir, url):
+#####################################
+def download_worker(args):
+    out_dir, url = args
     result = subprocess.run(
         ["wget", "-q", "-c", "--tries=3", "-P", out_dir, url]
     )
@@ -19,14 +20,14 @@ def download(out_dir, url):
 
 def filename_from_url(url):
     return Path(urlparse(url).path).name
-
+#####################################
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--fastq_dir", required=True)
+parser.add_argument("--out_dir", required=True)
 parser.add_argument("--url_file", required=True)
 parser.add_argument("--cores", type=int, required=True)
 args = parser.parse_args()
-
+Path(args.out_dir).mkdir(parents=True, exist_ok=True)
 
 # Read URL table
 samples = defaultdict(list)
@@ -40,7 +41,7 @@ with open(args.url_file) as f:
 
 # Ask user which samples to download
 urls_to_download = []
-samples_to_skip = []
+skipped_samples = []
 count = 1
 for sample, rows in samples.items():
     print("-" * 50)
@@ -60,7 +61,7 @@ for sample, rows in samples.items():
             urls_to_download.extend([r["fastq_url"] for r in rows])
             break
         elif answer == "n":
-            samples_to_skip.append(sample)
+            skipped_samples.append(sample)
             break
         else:
             print("Please enter Y or N.")
@@ -68,54 +69,32 @@ for sample, rows in samples.items():
 
 # Write skipped samples to file
 with open("skipped_samples.txt", "w") as f:
-    for s in samples_to_skip:
+    for s in skipped_samples:
         f.write(s + "\n") 
 
 print("-" * 50)
 print(f"Selected {len(urls_to_download)} files for download.")
 
-
-# Create output dir
-Path(args.fastq_dir).mkdir(exist_ok=True)
-
 # Download selected URLs
-with ThreadPoolExecutor(max_workers=args.cores) as ex:
-    futures = [ex.submit(download, args.fastq_dir, url) for url in urls_to_download]
-
-    for future in tqdm(as_completed(futures), total=len(futures)):
-        failed_url = future.result()
-
-        if failed_url is not None:
-            print(f"\nFAILED: {failed_url}")
+tasks = [(args.out_dir, url) for url in urls_to_download]
+with Pool(processes=args.cores) as pool:
+    for outcome in tqdm(pool.imap_unordered(download_worker, tasks), total=len(tasks)):
+        if outcome is not None:
+            print(f"\nFAILED: {outcome}")
 
 print("-" * 50)
 print(f"All done!")
 print("-" * 50)
 
-# # Move FASTQs to per-sample subdirectories
-# print("-" * 50)
-# print(f"Moving FASTQs to per-sample directories...")
+# Validate downloaded files (gzip integrity: catches truncated/corrupt downloads)
+def validate(fastq):
+    result = subprocess.run(["gzip", "-t", fastq], stderr=subprocess.DEVNULL)
+    return fastq if result.returncode != 0 else None
 
-# with open(args.url_file) as f:
-
-#     next(f)  # skip header
-
-#     for line in f:
-
-#         fields = line.rstrip().split("\t")
-
-#         sample = fields[0]
-#         url = fields[-1]
-
-#         filename = Path(url).name
-
-#         src = Path("fastq") / filename
-#         dst = Path("fastq") / sample / filename
-
-#         dst.parent.mkdir(exist_ok=True)
-
-#         shutil.move(src, dst)
-
-# print("-" * 50)
-# print(f"All done!")
-# print("-" * 50)
+files = [str(Path(args.out_dir) / filename_from_url(url)) for url in urls_to_download]
+print("Validating downloaded files...")
+with Pool(processes=args.cores) as pool:
+    for bad in tqdm(pool.imap_unordered(validate, files), total=len(files)):
+        if bad is not None:
+            print(f"\nCORRUPT: {bad}")
+print("Validation complete.")
